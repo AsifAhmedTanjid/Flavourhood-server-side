@@ -189,6 +189,24 @@ async function run() {
     });
 
 
+    //favorites
+
+        app.post("/favorites", verifyToken, async (req, res) => {
+      const data = req.body;
+      data.email = req.user.email;
+      const existing = await favoritesCollection.findOne({
+        reviewId: data.reviewId,
+        email: req.user.email,
+      });
+      if (existing)
+        return res.send({ success: false, message: "Already in favorites" });
+
+      const result = await favoritesCollection.insertOne(data);
+      res.send({ success: true, result });
+    });
+
+    
+
 
 
 
