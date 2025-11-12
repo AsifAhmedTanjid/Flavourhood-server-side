@@ -137,6 +137,15 @@ async function run() {
     });
 
 
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewCollection
+        .find()
+        .sort({ date: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+
 
 
 
