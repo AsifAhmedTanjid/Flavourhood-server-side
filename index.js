@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./flavorhood--firebase-key.json");
 require("dotenv").config();
 const app = express();
 const port = 3000;
@@ -8,6 +11,10 @@ const port = 3000;
 // middleware
 app.use(cors());
 app.use(express.json());
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.clghzkh.mongodb.net/?appName=Cluster0`;
 
@@ -23,6 +30,7 @@ const client = new MongoClient(uri, {
 app.get("/", (req, res) => {
   res.send("server is running");
 });
+
 async function run() {
   try {
     await client.connect();
@@ -34,12 +42,23 @@ async function run() {
     const userCollection = db.collection("users");
     const reviewCollection = db.collection("reviews");
 
-
-    // users 
+    // users
 
     app.get("/users", async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
+    });
+
+    app.get("/users:id", async (req, res) => {
+      const { id } = req.params;
+      const objectId = new ObjectId(id);
+
+      const result = await userCollection.findOne({ _id: objectId });
+
+      res.send({
+        success: true,
+        result,
+      });
     });
 
     app.post("/users", async (req, res) => {
@@ -50,6 +69,34 @@ async function run() {
         result,
       });
 
+      app.put("/users/:id", async (req, res) => {
+        const { id } = req.params;
+        const data = req.body;
+        const objectId = new ObjectId(id);
+        const filter = { _id: objectId };
+        const update = {
+          $set: data,
+        };
+
+        const result = await userCollection.updateOne(filter, update);
+
+        res.send({
+          success: true,
+          result,
+        });
+      });
+
+      app.delete("/users/:id", async (req, res) => {
+        const { id } = req.params;
+        const result = await userCollection.deleteOne({
+          _id: new ObjectId(id),
+        });
+
+        res.send({
+          success: true,
+          result,
+        });
+      });
 
 
 
@@ -58,22 +105,6 @@ async function run() {
 
 
       //reviews
-      
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
