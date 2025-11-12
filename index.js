@@ -18,7 +18,6 @@ admin.initializeApp({
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.clghzkh.mongodb.net/?appName=Cluster0`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -52,7 +51,6 @@ const verifyToken = async (req, res, next) => {
     });
   }
 };
-
 
 async function run() {
   try {
@@ -121,116 +119,106 @@ async function run() {
         });
       });
 
-
-
-
-
-
-
       //reviews
 
-    app.post("/reviews", verifyToken, async (req, res) => {
-      const data = req.body;
-      data.date = new Date();
-      data.email = req.user.email;
-      const result = await reviewCollection.insertOne(data);
-      res.send({ success: true, result });
-    });
+      app.post("/reviews", verifyToken, async (req, res) => {
+        const data = req.body;
+        data.date = new Date();
+        data.email = req.user.email;
+        const result = await reviewCollection.insertOne(data);
+        res.send({ success: true, result });
+      });
 
-
-    app.get("/reviews", async (req, res) => {
-      const result = await reviewCollection
-        .find()
-        .sort({ date: -1 })
-        .toArray();
-      res.send(result);
-    });
+      app.get("/reviews", async (req, res) => {
+        const result = await reviewCollection
+          .find()
+          .sort({ date: -1 })
+          .toArray();
+        res.send(result);
+      });
 
       app.get("/reviews/:id", async (req, res) => {
-      const { id } = req.params;
-      const result = await reviewCollection.findOne({ _id: new ObjectId(id) });
-      res.send(result);
-    });
-
-    app.put("/reviews/:id", verifyToken, async (req, res) => {
-      const { id } = req.params;
-      const data = req.body;
-      const filter = { _id: new ObjectId(id), email: req.user.email };
-      const update = { $set: data };
-      const result = await reviewCollection.updateOne(filter, update);
-      res.send(result);
-    });
-
-    app.delete("/reviews/:id", verifyToken, async (req, res) => {
-      const { id } = req.params;
-      const result = await reviewCollection.deleteOne({
-        _id: new ObjectId(id),
-        email: req.user.email,
+        const { id } = req.params;
+        const result = await reviewCollection.findOne({
+          _id: new ObjectId(id),
+        });
+        res.send(result);
       });
-      res.send(result);
-    });
 
-    app.get("/my-reviews", verifyToken, async (req, res) => {
-      const email = req.user.email;
-      const result = await reviewCollection
-        .find({ email })
-        .sort({ date: -1 })
-        .toArray();
-      res.send(result);
-    });
-
-    app.get("/featured", async (req, res) => {
-      const result = await reviewCollection
-        .find()
-        .sort({ rating: -1 })
-        .limit(6)
-        .toArray();
-      res.send(result);
-    });
-
-
-    //favorites
-
-        app.post("/favorites", verifyToken, async (req, res) => {
-      const data = req.body;
-      data.email = req.user.email;
-      const existing = await favoritesCollection.findOne({
-        reviewId: data.reviewId,
-        email: req.user.email,
+      app.put("/reviews/:id", verifyToken, async (req, res) => {
+        const { id } = req.params;
+        const data = req.body;
+        const filter = { _id: new ObjectId(id), email: req.user.email };
+        const update = { $set: data };
+        const result = await reviewCollection.updateOne(filter, update);
+        res.send(result);
       });
-      if (existing)
-        return res.send({ success: false, message: "Already in favorites" });
 
-      const result = await favoritesCollection.insertOne(data);
-      res.send({ success: true, result });
-    });
+      app.delete("/reviews/:id", verifyToken, async (req, res) => {
+        const { id } = req.params;
+        const result = await reviewCollection.deleteOne({
+          _id: new ObjectId(id),
+          email: req.user.email,
+        });
+        res.send(result);
+      });
 
+      app.get("/my-reviews", verifyToken, async (req, res) => {
+        const email = req.user.email;
+        const result = await reviewCollection
+          .find({ email })
+          .sort({ date: -1 })
+          .toArray();
+        res.send(result);
+      });
 
-       app.get("/my-favorites", verifyToken, async (req, res) => {
-      const email = req.user.email;
-      const result = await favoritesCollection.find({ email }).toArray();
-      res.send(result);
-    });
+      app.get("/featured", async (req, res) => {
+        const result = await reviewCollection
+          .find()
+          .sort({ rating: -1 })
+          .limit(6)
+          .toArray();
+        res.send(result);
+      });
 
+      //favorites
+
+      app.post("/favorites", verifyToken, async (req, res) => {
+        const data = req.body;
+        data.email = req.user.email;
+        const existing = await favoritesCollection.findOne({
+          reviewId: data.reviewId,
+          email: req.user.email,
+        });
+        if (existing)
+          return res.send({ success: false, message: "Already in favorites" });
+
+        const result = await favoritesCollection.insertOne(data);
+        res.send({ success: true, result });
+      });
+
+      app.get("/my-favorites", verifyToken, async (req, res) => {
+        const email = req.user.email;
+        const result = await favoritesCollection.find({ email }).toArray();
+        res.send(result);
+      });
 
       app.delete("/favorites/:id", verifyToken, async (req, res) => {
-      const { id } = req.params;
-      const result = await favoritesCollection.deleteOne({
-        _id: new ObjectId(id),
-        email: req.user.email,
+        const { id } = req.params;
+        const result = await favoritesCollection.deleteOne({
+          _id: new ObjectId(id),
+          email: req.user.email,
+        });
+        res.send(result);
       });
-      res.send(result);
-    });
 
-
-
-
-
-
-
-
-
-
+      app.get("/search", async (req, res) => {
+        const search_text = req.query.search;
+        const result = await modelCollection
+          .find({ foodName: { $regex: search_text, $options: "i" } })
+          .toArray();
+        res.send(result);
+      });
     });
 
     await client.db("admin").command({ ping: 1 });
