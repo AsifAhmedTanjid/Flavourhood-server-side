@@ -128,6 +128,15 @@ async function run() {
 
       //reviews
 
+      app.post("/reviews", verifyToken, async (req, res) => {
+      const data = req.body;
+      data.date = new Date();
+      data.email = req.user.email;
+      const result = await reviewCollection.insertOne(data);
+      res.send({ success: true, result });
+    });
+
+
 
 
 
