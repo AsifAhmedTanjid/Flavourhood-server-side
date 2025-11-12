@@ -42,7 +42,8 @@ const verifyToken = async (req, res, next) => {
 
   const token = authorization.split(" ")[1];
   try {
-    await admin.auth().verifyIdToken(token);
+    const decodedUser = await admin.auth().verifyIdToken(token);
+    req.user = decodedUser;
 
     next();
   } catch (error) {
@@ -160,12 +161,30 @@ async function run() {
       res.send(result);
     });
 
-        app.delete("/reviews/:id", verifyToken, async (req, res) => {
+    app.delete("/reviews/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
       const result = await reviewCollection.deleteOne({
         _id: new ObjectId(id),
         email: req.user.email,
       });
+      res.send(result);
+    });
+
+    app.get("/my-reviews", verifyToken, async (req, res) => {
+      const email = req.user.email;
+      const result = await reviewCollection
+        .find({ email })
+        .sort({ date: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/featured", async (req, res) => {
+      const result = await reviewCollection
+        .find()
+        .sort({ rating: -1 })
+        .limit(6)
+        .toArray();
       res.send(result);
     });
 
