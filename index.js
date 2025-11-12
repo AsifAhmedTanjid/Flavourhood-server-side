@@ -145,6 +145,11 @@ async function run() {
       res.send(result);
     });
 
+      app.get("/reviews/:id", async (req, res) => {
+      const { id } = req.params;
+      const result = await reviewCollection.findOne({ _id: new ObjectId(id) });
+      res.send(result);
+    });
 
     app.put("/reviews/:id", verifyToken, async (req, res) => {
       const { id } = req.params;
@@ -152,6 +157,15 @@ async function run() {
       const filter = { _id: new ObjectId(id), email: req.user.email };
       const update = { $set: data };
       const result = await reviewCollection.updateOne(filter, update);
+      res.send(result);
+    });
+
+        app.delete("/reviews/:id", verifyToken, async (req, res) => {
+      const { id } = req.params;
+      const result = await reviewCollection.deleteOne({
+        _id: new ObjectId(id),
+        email: req.user.email,
+      });
       res.send(result);
     });
 
