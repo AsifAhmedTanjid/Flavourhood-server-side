@@ -213,6 +213,15 @@ async function run() {
     });
 
 
+      app.delete("/favorites/:id", verifyToken, async (req, res) => {
+      const { id } = req.params;
+      const result = await favoritesCollection.deleteOne({
+        _id: new ObjectId(id),
+        email: req.user.email,
+      });
+      res.send(result);
+    });
+
 
 
 
