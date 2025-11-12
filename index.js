@@ -205,7 +205,12 @@ async function run() {
       res.send({ success: true, result });
     });
 
-    
+
+       app.get("/my-favorites", verifyToken, async (req, res) => {
+      const email = req.user.email;
+      const result = await favoritesCollection.find({ email }).toArray();
+      res.send(result);
+    });
 
 
 
