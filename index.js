@@ -128,7 +128,7 @@ async function run() {
 
       //reviews
 
-      app.post("/reviews", verifyToken, async (req, res) => {
+    app.post("/reviews", verifyToken, async (req, res) => {
       const data = req.body;
       data.date = new Date();
       data.email = req.user.email;
@@ -145,6 +145,15 @@ async function run() {
       res.send(result);
     });
 
+
+    app.put("/reviews/:id", verifyToken, async (req, res) => {
+      const { id } = req.params;
+      const data = req.body;
+      const filter = { _id: new ObjectId(id), email: req.user.email };
+      const update = { $set: data };
+      const result = await reviewCollection.updateOne(filter, update);
+      res.send(result);
+    });
 
 
 
