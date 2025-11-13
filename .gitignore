@@ -1,3 +1,4 @@
 node_modules
 .env
 flavorhood--firebase-key.json
+.vercel

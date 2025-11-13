@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const admin = require("firebase-admin");
 
 const serviceAccount = require("./flavorhood--firebase-key.json");
@@ -54,7 +54,7 @@ const verifyToken = async (req, res, next) => {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     // apis
 
@@ -89,6 +89,8 @@ async function run() {
         succes: true,
         result,
       });
+    });
+      
 
       app.put("/users/:id", async (req, res) => {
         const { id } = req.params;
@@ -218,13 +220,13 @@ async function run() {
           .find({ foodName: { $regex: search_text, $options: "i" } })
           .toArray();
         res.send(result);
-      });
+     
     });
 
-    await client.db("admin").command({ ping: 1 });
-    console.log(
-      "Pinged your deployment. You successfully connected to MongoDB!"
-    );
+    // await client.db("admin").command({ ping: 1 });
+    // console.log(
+    //   "Pinged your deployment. You successfully connected to MongoDB!"
+    // );
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
