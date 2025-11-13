@@ -61,7 +61,8 @@ async function run() {
     const db = client.db("flavorhood-db");
 
     const userCollection = db.collection("users");
-    const reviewCollection = db.collection("reviews");
+    const reviewCollection = db.collection("reviews")
+    const favoritesCollection = db.collection("favorites");
 
     // users
 
@@ -216,7 +217,7 @@ async function run() {
 
       app.get("/search", async (req, res) => {
         const search_text = req.query.search;
-        const result = await modelCollection
+        const result = await reviewCollection
           .find({ foodName: { $regex: search_text, $options: "i" } })
           .toArray();
         res.send(result);
