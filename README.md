@@ -34,3 +34,15 @@ npm install
 
 # Start the server
 node index.js
+```
+
+## Dependencies
+
+```json
+{
+  "cors": "^2.8.5",
+  "dotenv": "^17.2.3",
+  "express": "^5.1.0",
+  "firebase-admin": "^13.6.0",
+  "mongodb": "^7.0.0"
+}
