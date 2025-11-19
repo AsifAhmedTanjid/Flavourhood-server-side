@@ -44,3 +44,9 @@ node index.js
   "firebase-admin": "^13.6.0",
   "mongodb": "^7.0.0"
 }
+```
+
+## 👨‍💻 Author
+
+**Asif Ahmed Tanjid**
+- GitHub: [@AsifAhmedTanjid](https://github.com/AsifAhmedTanjid)
