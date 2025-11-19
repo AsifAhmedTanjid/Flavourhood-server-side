@@ -24,7 +24,7 @@ Additional Features:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/flavorhood-server-side.git
+git clone https://github.com/AsifAhmedTanjid/flavorhood-server-side.git
 cd flavorhood-server-side
 
 # Install dependencies
