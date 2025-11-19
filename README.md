@@ -30,8 +30,6 @@ cd flavorhood-server-side
 # Install dependencies
 npm install
 
-# Add .env file based on .env.example
-
 # Start the server
 node index.js
 ```
