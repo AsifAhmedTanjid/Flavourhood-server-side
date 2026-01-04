@@ -151,16 +151,12 @@ async function run() {
         });
       });
 
-      app.delete("/users/:id", async (req, res) => {
+      app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
         const { id } = req.params;
         const result = await userCollection.deleteOne({
           _id: new ObjectId(id),
         });
-
-        res.send({
-          success: true,
-          result,
-        });
+        res.send(result);
       });
 
       //reviews
@@ -225,10 +221,20 @@ async function run() {
 
       app.delete("/reviews/:id", verifyToken, async (req, res) => {
         const { id } = req.params;
-        const result = await reviewCollection.deleteOne({
-          _id: new ObjectId(id),
-          email: req.user.email,
-        });
+        const email = req.user.email;
+        
+        
+        const user = await userCollection.findOne({ email });
+        const isAdmin = user?.role === 'admin';
+
+        let query = { _id: new ObjectId(id) };
+        
+        
+        if (!isAdmin) {
+            query.email = email;
+        }
+
+        const result = await reviewCollection.deleteOne(query);
         res.send(result);
       });
 
