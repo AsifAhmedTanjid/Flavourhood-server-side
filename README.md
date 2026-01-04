@@ -4,15 +4,22 @@ This is the **backend server** for **Flavorhood**, a food review platform where 
 Built with **Node.js**, **Express**, **MongoDB**, and **Firebase Admin SDK** for authentication.
 
 ## Key Features
-- **User Management:** Add, edit, delete, and fetch users from MongoDB.  
-- **Reviews CRUD:** Users can create, update, delete, and fetch reviews.  
-- **Authentication & Authorization:** Firebase Authentication token verification for secure endpoints.  
+- **User Management:** 
+    - Add, fetch, and delete users.
+    - Role-based access control (Admin/User).
+    - Admin verification middleware.
+- **Reviews CRUD:** 
+    - Create, read, update, and delete reviews.
+    - Pagination, Sorting, and Filtering support.
+- **Authentication & Authorization:** 
+    - Firebase Authentication token verification.
+    - Secure endpoints protected by `verifyToken` and `verifyAdmin` middleware.
 - **Favorites System:** Users can favorite reviews and manage their favorites list.  
 - **Search Functionality:** Search reviews by food name using MongoDB regex queries.  
 
 Additional Features:  
-- Featured reviews endpoint (top-rated dishes)  
-- Sorted results for reviews and favorites    
+- Featured reviews endpoint (top-rated dishes).
+- Admin stats and management endpoints.
 
 ## Tech Stack
 - **Backend:** Node.js, Express  
