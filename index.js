@@ -64,14 +64,39 @@ async function run() {
     const reviewCollection = db.collection("reviews")
     const favoritesCollection = db.collection("favorites");
 
+    const verifyAdmin = async (req, res, next) => {
+      const email = req.user.email;
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      const isAdmin = user?.role === 'admin';
+      if (!isAdmin) {
+        return res.status(403).send({ message: 'forbidden access' });
+      }
+      next();
+    }
+
     // users
 
-    app.get("/users", async (req, res) => {
+    app.get("/users", verifyToken, verifyAdmin, async (req, res) => {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
 
-    app.get("/users:id", async (req, res) => {
+    app.get("/users/role/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.user.email) {
+        return res.status(403).send({ message: "forbidden access" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let role = "user";
+      if (user) {
+        role = user.role;
+      }
+      res.send({ role });
+    });
+
+    app.get("/users/:id", async (req, res) => {
       const { id } = req.params;
       const objectId = new ObjectId(id);
 
@@ -84,12 +109,28 @@ async function run() {
     });
 
     app.post("/users", async (req, res) => {
-      const data = req.body;
-      const result = await userCollection.insertOne(data);
-      res.send({
-        succes: true,
-        result,
-      });
+      const user = req.body;
+      const query = { email: user.email };
+      const existingUser = await userCollection.findOne(query);
+      if (existingUser) {
+        return res.send({ message: "user already exists", insertedId: null });
+      }
+      user.role = 'user';
+      
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+      
+    app.patch("/users/admin/:id", verifyToken, verifyAdmin, async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          role: "admin",
+        },
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
     });
       
 
@@ -133,11 +174,36 @@ async function run() {
       });
 
       app.get("/reviews", async (req, res) => {
+        const { category, sortBy, search, page = 1, limit = 9 } = req.query;
+        let query = {};
+        
+        if (category) {
+            query.category = category;
+        }
+        
+        if (search) {
+            query.foodName = { $regex: search, $options: "i" };
+        }
+
+        let sortOptions = { date: -1 };
+        if (sortBy === 'rating') {
+            sortOptions = { rating: -1 };
+        } else if (sortBy === 'year') {
+            sortOptions = { date: -1 };
+        }
+
+        const skip = (parseInt(page) - 1) * parseInt(limit);
+
         const result = await reviewCollection
-          .find()
-          .sort({ date: -1 })
+          .find(query)
+          .sort(sortOptions)
+          .skip(skip)
+          .limit(parseInt(limit))
           .toArray();
-        res.send(result);
+          
+        const total = await reviewCollection.countDocuments(query);
+        
+        res.send({ reviews: result, total });
       });
 
       app.get("/reviews/:id", async (req, res) => {
